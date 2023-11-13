@@ -1,4 +1,4 @@
-package gitgo
+package main
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 )
 
 var verbose = false
+var wd, _ = os.Getwd()
 
 func setVerbose(v bool) {
 	verbose = v
@@ -20,53 +21,58 @@ func verbosePrint(message string) {
 func createRepository(path string) error {
 	var err error
 
+	err = os.Mkdir(path+"/.git", os.ModePerm)
+	verbosePrint("CREATE " + wd + "/" + path + "/.git")
+	if err != nil {
+		return err
+	}
 	err = os.MkdirAll(path+"/.git/objects", os.ModePerm)
-	verbosePrint("CREATE " + path + "/.git/objects")
+	verbosePrint("CREATE " + wd + "/" + path + "/.git/objects")
 	if err != nil {
 		return err
 	}
 	err = os.MkdirAll(path+"/.git/refs/heads", os.ModePerm)
-	verbosePrint("CREATE " + path + "/.git/refs/heads")
+	verbosePrint("CREATE " + wd + "/" + path + "/.git/refs/heads")
 	if err != nil {
 		return err
 	}
 	err = os.MkdirAll(path+"/.git/refs/tags", os.ModePerm)
-	verbosePrint("CREATE " + path + "/.git/refs/tags")
+	verbosePrint("CREATE " + wd + "/" + path + "/.git/refs/tags")
 	if err != nil {
 		return err
 	}
 	head, err := os.Create(path + "/.git/HEAD")
-	verbosePrint("CREATE " + path + "/.git/HEAD")
+	verbosePrint("CREATE " + wd + "/" + path + "/.git/HEAD")
 	if err != nil {
 		return err
 	}
 	config, err := os.Create(path + "/.git/config")
-	verbosePrint("CREATE " + path + "/.git/config")
+	verbosePrint("CREATE " + wd + "/" + path + "/.git/config")
 	if err != nil {
 		return err
 	}
 	description, err := os.Create(path + "/.git/description")
-	verbosePrint("CREATE " + path + "/.git/description")
+	verbosePrint("CREATE " + wd + "/" + path + "/.git/description")
 	if err != nil {
 		return err
 	}
 
 	// .git/description
-	verbosePrint("WRITE TO " + path + "/.git/description")
+	verbosePrint("WRITE TO " + wd + "/" + path + "/.git/description")
 	_, err = fmt.Fprint(description, "Unnamed repository; edit this file 'description' to name the repository.\n")
 	if err != nil {
 		return err
 	}
 
 	// .git/HEAD
-	verbosePrint("WRITE TO " + path + "/.git/HEAD")
+	verbosePrint("WRITE TO " + wd + "/" + path + "/.git/HEAD")
 	_, err = fmt.Fprint(head, "ref: refs/heads/master\n")
 	if err != nil {
 		return err
 	}
 
 	// .git/config
-	verbosePrint("WRITE TO " + path + "/.git/config")
+	verbosePrint("WRITE TO " + wd + "/" + path + "/.git/config")
 	err = createConfig(config)
 
 	return err
@@ -74,18 +80,18 @@ func createRepository(path string) error {
 
 func createConfig(file *os.File) error {
 	var err error
-	_, err = fmt.Fprint(file, "[core]")
+	_, err = fmt.Fprintln(file, "[core]")
 	if err != nil {
 		return err
 	}
-	_, err = fmt.Fprint(file, "\trepositoryformatversion = 0")
+	_, err = fmt.Fprintln(file, "\trepositoryformatversion = 0")
 	if err != nil {
 		return err
 	}
-	_, err = fmt.Fprint(file, "\tfilemode = false")
+	_, err = fmt.Fprintln(file, "\tfilemode = false")
 	if err != nil {
 		return err
 	}
-	_, err = fmt.Fprint(file, "\tbare = false")
+	_, err = fmt.Fprintln(file, "\tbare = false")
 	return err
 }

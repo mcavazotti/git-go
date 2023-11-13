@@ -1,4 +1,4 @@
-package gitgo
+package main
 
 import (
 	"flag"
@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-	fmt.Println("aqui")
 	if len(os.Args) < 2 {
 		helpMessage()
 		return
