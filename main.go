@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"golang.org/x/exp/slices"
 )
 
 func main() {
@@ -13,10 +15,8 @@ func main() {
 	}
 
 	initCmd := flag.NewFlagSet("init", flag.ExitOnError)
-	for _, v := range os.Args {
-		if v == "--verbose" {
-			setVerbose(true)
-		}
+	if slices.Contains(os.Args, "--verbose") {
+		setVerbose(true)
 	}
 
 	switch os.Args[1] {
