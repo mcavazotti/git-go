@@ -22,3 +22,8 @@ func FindRepo(currPath string) (Repository, error) {
 		return New(currPath), nil
 	}
 }
+func RepoPath(r *Repository, pathSegments ...string) string {
+	p := []string{r.GitDir}
+	p = append(p, pathSegments...)
+	return path.Join(p...)
+}

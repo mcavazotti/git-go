@@ -8,9 +8,9 @@ import (
 )
 
 type Repository struct {
-	gitDir   string
-	workTree string
-	config   *ini.File
+	GitDir   string
+	WorkTree string
+	Config   *ini.File
 }
 
 func New(path string) Repository {
@@ -27,6 +27,6 @@ func New(path string) Repository {
 		panic(err)
 	}
 
-	repo := Repository{gitDir: gitDir, workTree: workTree, config: config}
+	repo := Repository{GitDir: gitDir, WorkTree: workTree, Config: config}
 	return repo
 }
