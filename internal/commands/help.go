@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -15,6 +16,5 @@ func HelpMessage() {
 	fmt.Printf("\nUSAGE:\n")
 	fmt.Printf("> %s <commands> [<args>] [--verbose]", programPath[len(programPath)-1])
 	fmt.Printf("\nCOMMANDS:\n")
-	fmt.Printf("\tinit [<path>]\n")
-	fmt.Printf("\thelp\n")
+	flag.PrintDefaults()
 }

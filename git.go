@@ -6,19 +6,21 @@ import (
 	"mcavazotti/git-go/internal/commands"
 	"mcavazotti/git-go/internal/shared"
 	"os"
-
-	"golang.org/x/exp/slices"
 )
 
 func main() {
+
+	initCmd := flag.NewFlagSet("init", flag.ExitOnError)
+
+	verbose := flag.Bool("verbose mode", false, "Activate verbose messages")
+	if *verbose {
+		fmt.Print("verbose")
+		shared.VerboseMode()
+	}
+
 	if len(os.Args) < 2 {
 		commands.HelpMessage()
 		return
-	}
-
-	initCmd := flag.NewFlagSet("init", flag.ExitOnError)
-	if slices.Contains(os.Args, "--verbose") {
-		shared.VerboseMode()
 	}
 
 	switch os.Args[1] {
