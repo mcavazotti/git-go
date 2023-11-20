@@ -1,4 +1,4 @@
-package commands
+package cmd
 
 import (
 	"fmt"
@@ -7,15 +7,28 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
 	"gopkg.in/ini.v1"
 )
 
-func InitRepo(args []string) {
-	path := "."
-	if len(args) >= 1 {
-		path = args[0]
-	}
-	createRepository(path)
+// initCmd represents the init command
+var initCmd = &cobra.Command{
+	Use:   "init [repository path]",
+	Short: "Initialize a new, empty repository.",
+	Args:  cobra.MaximumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		shared.VerbosePrint("Run command Init")
+		repoPath := "."
+		if len(args) != 0 {
+			repoPath = args[0]
+		}
+		createRepository(repoPath)
+
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(initCmd)
 }
 
 func createRepository(repoPath string) {
