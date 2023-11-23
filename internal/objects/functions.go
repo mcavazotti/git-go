@@ -10,13 +10,17 @@ import (
 	"os"
 )
 
+func HashData(data *[]byte) (string, error) {
+	hash := sha1.Sum(*data)
+	return hex.EncodeToString(hash[:]), nil
+}
+
 func HashFile(filePath string) (string, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", err
 	}
-	hash := sha1.Sum(data)
-	return hex.EncodeToString(hash[:]), nil
+	return HashData(&data)
 }
 
 func CreateObjectData(data *[]byte, objType string) ([]byte, error) {
