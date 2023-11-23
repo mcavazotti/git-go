@@ -4,14 +4,14 @@ import (
 	"fmt"
 )
 
-var verbose bool = false
+var Verbose bool = false
 
 func VerboseMode() {
-	verbose = true
+	Verbose = true
 }
 
 func VerbosePrint(message string) {
-	if verbose {
+	if Verbose {
 		fmt.Println(message)
 	}
 }

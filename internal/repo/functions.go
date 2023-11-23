@@ -2,10 +2,19 @@ package repo
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 )
+
+func FindObject(repository *Repository, object string) (string, error) {
+	p := RepoPath(repository, "objects", object[:2], object[2:])
+	if _, err := os.Stat(p); errors.Is(err, os.ErrNotExist) {
+		return "", fmt.Errorf("Not a valid object name %s", object)
+	}
+	return p, nil
+}
 
 func FindRepo(currPath string) (Repository, error) {
 	if _, err := os.Stat(path.Join(currPath, ".git")); errors.Is(err, os.ErrNotExist) {

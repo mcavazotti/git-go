@@ -13,7 +13,7 @@ import (
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
-	Use:   "init [repository path]",
+	Use:   "init [<directory>]",
 	Short: "Initialize a new, empty repository.",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {

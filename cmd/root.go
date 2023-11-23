@@ -21,10 +21,7 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		if verbose {
-			shared.VerboseMode()
-		}
-
+		cmd.Help()
 	},
 }
 
@@ -38,5 +35,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Turn on verbose mode")
+	rootCmd.PersistentFlags().BoolVar(&shared.Verbose, "verbose", false, "Turn on verbose mode")
 }

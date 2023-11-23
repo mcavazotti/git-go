@@ -6,7 +6,7 @@ import (
 	"path"
 )
 
-func WriteBlob(repository repo.Repository, filePath string) error {
+func WriteBlob(repository *repo.Repository, filePath string) error {
 	hash, err := HashFile(filePath)
 
 	if err != nil {
@@ -30,4 +30,18 @@ func WriteBlob(repository repo.Repository, filePath string) error {
 
 	err = os.WriteFile(path.Join(folder, hash[2:]), compressedObj, os.ModePerm)
 	return err
+}
+
+func ReadBlob(repository *repo.Repository, sha string) ([]byte, error) {
+	objPath, err := repo.FindObject(repository, sha)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	obj, err := ReadObject(objPath)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return obj.data, nil
 }
