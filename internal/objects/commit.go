@@ -3,8 +3,6 @@ package objects
 import (
 	"bufio"
 	"mcavazotti/git-go/internal/repo"
-	"os"
-	"path"
 	"strings"
 )
 
@@ -36,32 +34,11 @@ func CommitToString(commit CommitObject) string {
 
 func WriteCommit(repository *repo.Repository, commit CommitObject) error {
 	commitData := []byte(CommitToString(commit))
-	hash, err := HashData(&commitData)
-
-	if err != nil {
-		return err
-	}
-
-	folder := path.Join(repository.GitDir, "objects", hash[:2])
-	if err := os.MkdirAll(folder, os.ModePerm); err != nil {
-		return err
-	}
-
-	compressedObj, err := CreateObjectData(&commitData, "blob")
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(path.Join(folder, hash[2:]), compressedObj, os.ModePerm)
-	return err
+	return WriteObject(repository, &commitData, "commit")
 }
 
 func ReadCommit(repository *repo.Repository, sha string) (CommitObject, error) {
-	objPath, err := repo.FindObject(repository, sha)
-	if err != nil {
-		return CommitObject{}, err
-	}
-
-	obj, err := ReadObject(objPath)
+	obj, err := ReadObject(repository, sha)
 	if err != nil {
 		return CommitObject{}, err
 	}

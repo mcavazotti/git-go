@@ -7,7 +7,9 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"mcavazotti/git-go/internal/repo"
 	"os"
+	"path"
 )
 
 func HashData(data *[]byte) (string, error) {
@@ -41,7 +43,31 @@ func CreateObjectData(data *[]byte, objType string) ([]byte, error) {
 	return buffer.Bytes(), err
 }
 
-func ReadObject(objPath string) (GitObject, error) {
+func WriteObject(repository *repo.Repository, data *[]byte, objType string) error {
+	hash, err := HashData(data)
+
+	if err != nil {
+		return err
+	}
+
+	folder := path.Join(repository.GitDir, "objects", hash[:2])
+	if err := os.MkdirAll(folder, os.ModePerm); err != nil {
+		return err
+	}
+
+	compressedObj, err := CreateObjectData(data, objType)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(path.Join(folder, hash[2:]), compressedObj, os.ModePerm)
+	return err
+}
+
+func ReadObject(repository *repo.Repository, sha string) (GitObject, error) {
+	objPath, err := repository.FindObject(sha)
+	if err != nil {
+		return GitObject{}, err
+	}
 
 	compressedData, err := os.ReadFile(objPath)
 	if err != nil {
