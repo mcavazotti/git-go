@@ -2,14 +2,18 @@ package objects
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"mcavazotti/git-go/internal/repo"
+	"os"
+	"sort"
+	"strconv"
 )
 
 type TreeEntry struct {
-	mode []byte
-	path string
-	sha  []byte
+	Mode os.FileMode
+	Path string
+	Sha  []byte
 }
 
 type TreeObject []TreeEntry
@@ -18,11 +22,11 @@ func WriteTree(repository *repo.Repository, tree TreeObject) error {
 	var treeData []byte
 
 	for _, entry := range tree {
-		treeData = append(treeData, entry.mode...)
+		treeData = append(treeData, fmt.Sprint(entry.Mode)...)
 		treeData = append(treeData, ' ')
-		treeData = append(treeData, []byte(entry.path)...)
+		treeData = append(treeData, entry.Path...)
 		treeData = append(treeData, 0x00)
-		treeData = append(treeData, entry.sha...)
+		treeData = append(treeData, entry.Sha...)
 	}
 
 	return WriteObject(repository, &treeData, "tree")
@@ -33,28 +37,42 @@ func ReadTree(repository *repo.Repository, sha string) (TreeObject, error) {
 	if err != nil {
 		return TreeObject{}, err
 	}
-
 	tree := TreeObject{}
 	r := bytes.NewReader(obj.data)
 
-	for entry, err := readEntry(r); err != io.EOF; {
+	for entry, err := readTreeEntry(r); err != io.EOF; {
 		if err != nil {
 			return TreeObject{}, err
 		}
 		tree = append(tree, entry)
 	}
+
+	sort.Slice(tree, func(i, j int) bool {
+		pathA := tree[i].Path
+		pathB := tree[j].Path
+		if tree[i].Mode.IsDir() {
+			pathA += "/"
+		}
+		if tree[j].Mode.IsDir() {
+			pathB += "/"
+		}
+		return pathA < pathB
+	})
+
 	return tree, nil
 }
 
-func readEntry(reader *bytes.Reader) (TreeEntry, error) {
+func readTreeEntry(reader *bytes.Reader) (TreeEntry, error) {
 	entry := TreeEntry{}
-
+	var mode string
 	for b, err := reader.ReadByte(); b != ' '; {
 		if err != nil {
 			return TreeEntry{}, err
 		}
-		entry.mode = append(entry.mode, b)
+		mode += string(b)
 	}
+	modeVal, _ := strconv.ParseInt(string(mode), 8, 32)
+	entry.Mode = os.FileMode(uint32(modeVal))
 
 	pathBuffer := bytes.NewBufferString("")
 	for b, err := reader.ReadByte(); b != 0x00; {
@@ -63,14 +81,14 @@ func readEntry(reader *bytes.Reader) (TreeEntry, error) {
 		}
 		pathBuffer.WriteByte(b)
 	}
-	entry.path = pathBuffer.String()
+	entry.Path = pathBuffer.String()
 
 	sha := make([]byte, 20)
 	_, err := reader.Read(sha)
 	if err != nil {
 		return TreeEntry{}, err
 	}
-	entry.sha = sha
+	entry.Sha = sha
 
 	return entry, nil
 }

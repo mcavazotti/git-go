@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 )
 
-func (repository Repository) FindObject(object string) (string, error) {
-	p := RepoPath(&repository, "objects", object[:2], object[2:])
+func (r Repository) FindObject(object string) (string, error) {
+	p := r.RepoPath( "objects", object[:2], object[2:])
 	if _, err := os.Stat(p); errors.Is(err, os.ErrNotExist) {
 		return "", fmt.Errorf("Not a valid object name %s", object)
 	}
@@ -31,7 +31,7 @@ func FindRepo(currPath string) (Repository, error) {
 		return New(currPath), nil
 	}
 }
-func RepoPath(r *Repository, pathSegments ...string) string {
+func (r Repository) RepoPath(pathSegments ...string) string {
 	p := []string{r.GitDir}
 	p = append(p, pathSegments...)
 	return path.Join(p...)
