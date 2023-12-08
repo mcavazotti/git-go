@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -37,6 +38,22 @@ func (r Repository) RepoPath(pathSegments ...string) string {
 	return path.Join(p...)
 }
 
+func (r Repository) Resolve(s string) (string, error) {
+	if s == "HEAD" {
+		b, err := os.ReadFile(r.RepoPath("HEAD"))
+		if err != nil {
+			return "", err
+		}
+		s = string(b[5:])
+	}
+
+	if _, err := hex.DecodeString(s); err != nil {
+		return r.ResolveRef(s)
+	}
+
+	return s, nil
+}
+
 func (r Repository) ResolveRef(ref string) (string, error) {
 	path := r.RepoPath(ref)
 
@@ -47,7 +64,7 @@ func (r Repository) ResolveRef(ref string) (string, error) {
 	strData := string(data)
 	strData = strData[:len(strData)-1]
 	if strData[0] == 'r' {
-		return r.ResolveRef(strData)
+		return r.ResolveRef(strData[5:])
 	}
 	return strData, nil
 }
