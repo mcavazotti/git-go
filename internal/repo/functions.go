@@ -10,9 +10,14 @@ import (
 )
 
 func (r Repository) FindObject(object string) (string, error) {
-	p := r.RepoPath("objects", object[:2], object[2:])
+	sha, err := r.Resolve(object)
+	if err != nil {
+		return "", err
+	}
+
+	p := r.RepoPath("objects", sha[:2], sha[2:])
 	if _, err := os.Stat(p); errors.Is(err, os.ErrNotExist) {
-		return "", fmt.Errorf("Not a valid object name %s", object)
+		return "", fmt.Errorf("Not a valid object name %s", sha)
 	}
 	return p, nil
 }
@@ -51,7 +56,29 @@ func (r Repository) Resolve(s string) (string, error) {
 		return r.ResolveRef(s)
 	}
 
-	return s, nil
+	dir, err := os.ReadDir(r.RepoPath("objects", s[:2]))
+
+	if err != nil {
+		return "", err
+	}
+
+	var candidates []string
+
+	for _, f := range dir {
+		if s[2:] == f.Name()[:len(s[2:])] {
+			candidates = append(candidates, s[:2]+f.Name())
+		}
+	}
+
+	if len(candidates) == 0 {
+		return "", fmt.Errorf("Failed to resolve '%s' as a valid ref.", s)
+	}
+
+	if len(candidates) > 1 {
+		return "", fmt.Errorf("Short object ID 0a4b is ambiguous.\nFailed to resolve '%s' as a valid ref.", s)
+	}
+
+	return candidates[0], nil
 }
 
 func (r Repository) ResolveRef(ref string) (string, error) {
