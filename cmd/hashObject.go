@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mcavazotti/git-go/internal/objects"
 	"mcavazotti/git-go/internal/repo"
+	"mcavazotti/git-go/internal/shared"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -18,6 +19,7 @@ var hashObjectCmd = &cobra.Command{
 	Short: "Compute object ID and optionally creates a blob from a file",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		shared.VerbosePrint("Write flag: " + fmt.Sprint(write))
 		wd, err := os.Getwd()
 		if err != nil {
 			panic(err)
@@ -33,11 +35,13 @@ var hashObjectCmd = &cobra.Command{
 			panic(err)
 		}
 
-		fmt.Print(sha)
+		fmt.Println(sha)
 
 		if write {
+			shared.VerbosePrint("Write")
 			switch objType {
 			case "blob":
+				shared.VerbosePrint("blob")
 				if err := objects.WriteBlob(&r, args[0]); err != nil {
 					panic(err)
 				}

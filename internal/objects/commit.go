@@ -34,7 +34,8 @@ func CommitToString(commit CommitObject) string {
 
 func WriteCommit(repository *repo.Repository, commit CommitObject) error {
 	commitData := []byte(CommitToString(commit))
-	return WriteObject(repository, &commitData, "commit")
+	_, err := WriteObject(repository, &commitData, "commit")
+	return err
 }
 
 func ReadCommit(repository *repo.Repository, sha string) (CommitObject, error) {
@@ -43,7 +44,7 @@ func ReadCommit(repository *repo.Repository, sha string) (CommitObject, error) {
 		return CommitObject{}, err
 	}
 
-	commitData := string(obj.data)
+	commitData := string(obj.Data)
 
 	var commit CommitObject
 

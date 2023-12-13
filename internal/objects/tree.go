@@ -29,7 +29,8 @@ func WriteTree(repository *repo.Repository, tree TreeObject) error {
 		treeData = append(treeData, entry.Sha...)
 	}
 
-	return WriteObject(repository, &treeData, "tree")
+	_, err := WriteObject(repository, &treeData, "tree")
+	return err
 }
 
 func ReadTree(repository *repo.Repository, sha string) (TreeObject, error) {
@@ -38,7 +39,7 @@ func ReadTree(repository *repo.Repository, sha string) (TreeObject, error) {
 		return TreeObject{}, err
 	}
 	tree := TreeObject{}
-	r := bytes.NewReader(obj.data)
+	r := bytes.NewReader(obj.Data)
 
 	for entry, err := readTreeEntry(r); err != io.EOF; {
 		if err != nil {

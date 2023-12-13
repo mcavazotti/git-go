@@ -33,7 +33,7 @@ func TagToString(tag TagObject) string {
 	return tagStr
 }
 
-func WriteTag(repository *repo.Repository, tag TagObject) error {
+func WriteTag(repository *repo.Repository, tag TagObject) (string, error) {
 	commitData := []byte(TagToString(tag))
 	return WriteObject(repository, &commitData, "tag")
 }
@@ -44,7 +44,7 @@ func ReadTag(repository *repo.Repository, sha string) (TagObject, error) {
 		return TagObject{}, err
 	}
 
-	tagData := string(obj.data)
+	tagData := string(obj.Data)
 
 	var tag TagObject
 
@@ -110,7 +110,7 @@ func CreateTag(repository *repo.Repository, name string, ref string, force bool,
 	}
 
 	if !createObj {
-		os.WriteFile(path.Join(tagsFolder, name), []byte(sha), os.ModePerm)
+		return os.WriteFile(path.Join(tagsFolder, name), []byte(sha), os.ModePerm)
 	}
 
 	gitObj, err := ReadObject(repository, sha)
@@ -120,12 +120,17 @@ func CreateTag(repository *repo.Repository, name string, ref string, force bool,
 
 	tag := TagObject{
 		object:  sha,
-		objType: gitObj.objType,
+		objType: gitObj.ObjType,
 		tag:     name,
 		tagger:  "Todo",
 		gpgsig:  "",
 		message: message,
 	}
 
-	return WriteTag(repository, tag)
+	sha, err = WriteTag(repository, tag)
+
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path.Join(tagsFolder, name), []byte(sha), os.ModePerm)
 }
