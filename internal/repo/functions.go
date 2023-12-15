@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 func (r Repository) FindObject(object string) (string, error) {
@@ -132,4 +133,16 @@ func (r Repository) ResolveRef(ref string) (string, error) {
 	}
 	shared.VerbosePrint("Resolved: " + strData)
 	return strData, nil
+}
+
+func (r Repository) GetActiveBranch() (string, bool, error) {
+	data, err := os.ReadFile(path.Join(r.GitDir, "HEAD"))
+	if err != nil {
+		return "", false, err
+	}
+	if strings.HasPrefix(string(data), "ref: refs/heads/") {
+		return string(data)[16:], true, nil
+	} else {
+		return string(data), false, nil
+	}
 }
