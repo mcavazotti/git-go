@@ -17,7 +17,7 @@ var initCmd = &cobra.Command{
 	Short: "Initialize a new, empty repository.",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		shared.VerbosePrint("Run command Init")
+		shared.VerbosePrintln("Run command Init")
 		repoPath := "."
 		if len(args) != 0 {
 			repoPath = args[0]
@@ -35,54 +35,54 @@ func createRepository(repoPath string) {
 	var err error
 	wd, _ := os.Getwd()
 
-	err = os.Mkdir(repoPath+"/.git", os.ModePerm)
-	shared.VerbosePrint("CREATE " + filepath.Clean(path.Join(wd, repoPath, ".git")))
+	err = os.Mkdir(path.Join(repoPath, ".git"), os.ModePerm)
+	shared.VerbosePrintln("CREATE", filepath.Clean(path.Join(wd, repoPath, ".git")))
 	if err != nil {
 		panic(err)
 	}
-	err = os.MkdirAll(repoPath+"/.git/objects", os.ModePerm)
-	shared.VerbosePrint("CREATE " + filepath.Clean(path.Join(wd, repoPath, ".git", "objects")))
+	err = os.MkdirAll(path.Join(repoPath, ".git", "objects"), os.ModePerm)
+	shared.VerbosePrintln("CREATE", filepath.Clean(path.Join(wd, repoPath, ".git", "objects")))
 	if err != nil {
 		panic(err)
 	}
-	err = os.MkdirAll(repoPath+"/.git/refs/heads", os.ModePerm)
-	shared.VerbosePrint("CREATE " + filepath.Clean(path.Join(wd, repoPath, ".git", "refs", "heads")))
+	err = os.MkdirAll(path.Join(repoPath, ".git", "refs", "heads"), os.ModePerm)
+	shared.VerbosePrintln("CREATE", filepath.Clean(path.Join(wd, repoPath, ".git", "refs", "heads")))
 	if err != nil {
 		panic(err)
 	}
-	err = os.MkdirAll(repoPath+"/.git/refs/tags", os.ModePerm)
-	shared.VerbosePrint("CREATE " + filepath.Clean(path.Join(wd, repoPath, ".git", "refs", "tags")))
+	err = os.MkdirAll(path.Join(repoPath, ".git", "refs", "tags"), os.ModePerm)
+	shared.VerbosePrintln("CREATE", filepath.Clean(path.Join(wd, repoPath, ".git", "refs", "tags")))
 	if err != nil {
 		panic(err)
 	}
-	head, err := os.Create(repoPath + "/.git/HEAD")
-	shared.VerbosePrint("CREATE " + filepath.Clean(path.Join(wd, repoPath, ".git", "HEAD")))
+	head, err := os.Create(path.Join(repoPath, ".git", "HEAD"))
+	shared.VerbosePrintln("CREATE", filepath.Clean(path.Join(wd, repoPath, ".git", "HEAD")))
 	if err != nil {
 		panic(err)
 	}
-	description, err := os.Create(repoPath + "/.git/description")
-	shared.VerbosePrint("CREATE " + filepath.Clean(path.Join(wd, repoPath, ".git", "description")))
+	description, err := os.Create(path.Join(repoPath, ".git", "description"))
+	shared.VerbosePrintln("CREATE", filepath.Clean(path.Join(wd, repoPath, ".git", "description")))
 	if err != nil {
 		panic(err)
 	}
 
 	// .git/description
-	shared.VerbosePrint("WRITE TO " + filepath.Clean(path.Join(wd, repoPath, ".git", "description")))
+	shared.VerbosePrintln("WRITE TO", filepath.Clean(path.Join(wd, repoPath, ".git", "description")))
 	_, err = fmt.Fprint(description, "Unnamed repository; edit this file 'description' to name the repository.\n")
 	if err != nil {
 		panic(err)
 	}
 
 	// .git/HEAD
-	shared.VerbosePrint("WRITE TO " + filepath.Clean(path.Join(wd, repoPath, ".git", "HEAD")))
+	shared.VerbosePrintln("WRITE TO", filepath.Clean(path.Join(wd, repoPath, ".git", "HEAD")))
 	_, err = fmt.Fprint(head, "ref: refs/heads/master\n")
 	if err != nil {
 		panic(err)
 	}
 
 	// .git/config
-	shared.VerbosePrint("CREATE " + filepath.Clean(wd+"/"+repoPath+"/.git/config"))
-	createConfig(wd + "/" + repoPath + "/.git/config")
+	shared.VerbosePrintln("CREATE", filepath.Clean(path.Join(wd, repoPath, ".git", "config")))
+	createConfig(path.Join(wd, repoPath, ".git", "config"))
 
 }
 

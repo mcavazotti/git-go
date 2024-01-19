@@ -44,9 +44,9 @@ func CreateObjectData(data *[]byte, objType string) ([]byte, error) {
 }
 
 func WriteObject(p string, data *[]byte, objType string) (string, error) {
-	shared.VerbosePrint("Write Object: " + objType)
+	shared.VerbosePrintln("Write Object:", objType)
 	hash, err := HashData(data)
-	shared.VerbosePrint("Object SHA: " + hash)
+	shared.VerbosePrintln("Object SHA:", hash)
 
 	if err != nil {
 		return hash, err

@@ -19,7 +19,7 @@ var hashObjectCmd = &cobra.Command{
 	Short: "Compute object ID and optionally creates a blob from a file",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		shared.VerbosePrint("Write flag: " + fmt.Sprint(write))
+		shared.VerbosePrintln("Write flag:", write)
 		wd, err := os.Getwd()
 		if err != nil {
 			panic(err)
@@ -38,10 +38,10 @@ var hashObjectCmd = &cobra.Command{
 		fmt.Println(sha)
 
 		if write {
-			shared.VerbosePrint("Write")
+			shared.VerbosePrintln("Write")
 			switch objType {
 			case "blob":
-				shared.VerbosePrint("blob")
+				shared.VerbosePrintln("blob")
 				if err := objects.WriteBlob(&r, args[0]); err != nil {
 					panic(err)
 				}

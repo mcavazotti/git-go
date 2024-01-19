@@ -7,7 +7,7 @@ import (
 )
 
 func WriteBlob(repository *repo.Repository, filePath string) error {
-	shared.VerbosePrint("Write Blob: " + filePath)
+	shared.VerbosePrintln("Write Blob:", filePath)
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return err

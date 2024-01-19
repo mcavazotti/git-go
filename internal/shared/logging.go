@@ -10,8 +10,13 @@ func VerboseMode() {
 	Verbose = true
 }
 
-func VerbosePrint(message string) {
+func VerbosePrintf(format string, a ...any) {
 	if Verbose {
-		fmt.Println(message)
+		fmt.Printf(format, a...)
+	}
+}
+func VerbosePrintln(a ...any) {
+	if Verbose {
+		fmt.Println(a...)
 	}
 }

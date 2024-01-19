@@ -14,17 +14,17 @@ import (
 
 func (r Repository) FindObject(object string) (string, error) {
 	sha, err := r.Resolve(object)
-	shared.VerbosePrint("Object SHA: " + sha)
+	shared.VerbosePrintln("Object SHA:", sha)
 	if err != nil {
 		return "", err
 	}
 
 	p := r.RepoPath("objects", sha[:2], sha[2:])
 	if _, err := os.Stat(p); errors.Is(err, os.ErrNotExist) {
-		shared.VerbosePrint("Error> " + err.Error())
+		shared.VerbosePrintln("Error>", err.Error())
 		return "", fmt.Errorf("Not a valid object name %s", sha)
 	}
-	shared.VerbosePrint("Found object: " + p)
+	shared.VerbosePrintln("Found object:", p)
 	return p, nil
 }
 
@@ -46,12 +46,12 @@ func FindRepo(currPath string) (Repository, error) {
 func (r Repository) RepoPath(pathSegments ...string) string {
 	p := []string{r.GitDir}
 	p = append(p, pathSegments...)
-	shared.VerbosePrint("RepoPath> " + path.Join(p...))
+	shared.VerbosePrintln("RepoPath>", path.Join(p...))
 	return path.Join(p...)
 }
 
 func (r Repository) Resolve(s string) (string, error) {
-	shared.VerbosePrint("Resolving: " + s)
+	shared.VerbosePrintln("Resolving:", s)
 	if s == "HEAD" {
 		b, err := os.ReadFile(r.RepoPath("HEAD"))
 		if err != nil {
@@ -59,10 +59,15 @@ func (r Repository) Resolve(s string) (string, error) {
 		}
 		s = string(b[5:])
 	}
+	s = strings.TrimSuffix(s, "\n")
+	s = strings.TrimSuffix(s, "\r")
 
 	if _, err := hex.DecodeString(s); err != nil {
+		shared.VerbosePrintln("\n\nChecking if is tag")
 		tag, errTag := r.ResolveRef(path.Join("refs", "tags", s))
+		shared.VerbosePrintln("\n\nChecking if is branch")
 		branch, errBranch := r.ResolveRef(path.Join("refs", "heads", s))
+		shared.VerbosePrintln("\n\nChecking if is ref")
 		ref, err := r.ResolveRef(s)
 
 		if errTag != nil && errBranch != nil && err != nil {
@@ -119,19 +124,18 @@ func (r Repository) Resolve(s string) (string, error) {
 }
 
 func (r Repository) ResolveRef(ref string) (string, error) {
-	shared.VerbosePrint("Resolving reference: " + ref)
+	shared.VerbosePrintln("Resolving reference:", ref)
 	path := r.RepoPath(ref)
 
 	data, err := os.ReadFile(path)
 	if err != nil {
-		shared.VerbosePrint("Error> " + err.Error())
 		return "", err
 	}
 	strData := string(data)
 	if strData[0] == 'r' {
 		return r.ResolveRef(strData[5:])
 	}
-	shared.VerbosePrint("Resolved: " + strData)
+	shared.VerbosePrintln("Resolved:", strData)
 	return strData, nil
 }
 
