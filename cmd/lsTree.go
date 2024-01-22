@@ -9,7 +9,6 @@ import (
 	"mcavazotti/git-go/internal/objects"
 	"mcavazotti/git-go/internal/repo"
 	"os"
-	"path"
 
 	"github.com/spf13/cobra"
 )
@@ -51,14 +50,24 @@ func listTree(r *repo.Repository, sha string, prefix string) error {
 	}
 
 	for _, entry := range tree {
-		if entry.Mode.IsDir() {
-			if recursive {
-				listTree(r, hex.EncodeToString(entry.Sha), entry.Path)
-			} else {
-				fmt.Printf("%o tree %s\t%s\n", entry.Mode, hex.EncodeToString(entry.Sha), entry.Path)
-			}
+		var t string
+		switch fmt.Sprintf("%06o", entry.Mode)[:2] {
+		case "04":
+			t = "tree"
+		case "10":
+			t = "blob"
+		case "12":
+			t = "blob"
+		case "16":
+			t = "commit"
+		default:
+			panic("Unknown tree leaf mode")
+		}
+
+		if t == "tree" && recursive {
+			listTree(r, hex.EncodeToString(entry.Sha), entry.Path)
 		} else {
-			fmt.Printf("%o blob %s\t%s\n", entry.Mode, hex.EncodeToString(entry.Sha), path.Join(prefix, entry.Path))
+			fmt.Printf("%06o %s %s\t%s\n", entry.Mode, t, hex.EncodeToString(entry.Sha), entry.Path)
 		}
 
 	}

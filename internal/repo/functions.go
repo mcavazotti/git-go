@@ -90,11 +90,17 @@ func (r Repository) Resolve(s string) (string, error) {
 			if obj.ObjType == "tag" {
 				tag = string(obj.Data[7:47])
 			}
+			tag = strings.TrimSuffix(tag, "\n")
+			tag = strings.TrimSuffix(tag, "\r")
 			return tag, nil
 		} else if errBranch == nil {
+			branch = strings.TrimSuffix(branch, "\n")
+			branch = strings.TrimSuffix(branch, "\r")
 			return branch, nil
 		}
 
+		ref = strings.TrimSuffix(ref, "\n")
+		ref = strings.TrimSuffix(ref, "\r")
 		return ref, err
 	}
 
