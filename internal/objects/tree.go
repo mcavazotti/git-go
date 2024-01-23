@@ -107,7 +107,9 @@ func readTreeEntry(reader *bytes.Reader) (TreeEntry, error) {
 }
 
 func FlattenTree(repository *repo.Repository, sha string) (map[string]string, error) {
+	shared.VerbosePrintln("\n##################")
 	shared.VerbosePrintln("FlatenTree> ", sha)
+	shared.VerbosePrintln("##################")
 	tree, err := ReadTree(repository, sha)
 
 	if err != nil {
@@ -117,7 +119,7 @@ func FlattenTree(repository *repo.Repository, sha string) (map[string]string, er
 	entries := make(map[string]string)
 
 	for _, e := range tree {
-		if e.Mode.IsDir() {
+		if fmt.Sprintf("%06o", e.Mode)[:2] == "04" {
 			subTreeEntries, err := FlattenTree(repository, hex.EncodeToString(e.Sha))
 			if err != nil {
 				return nil, err

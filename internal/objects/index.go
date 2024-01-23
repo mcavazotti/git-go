@@ -227,6 +227,9 @@ func readIndexEntry(reader *bytes.Reader) (IndexEntry, error) {
 		bytesRead++
 	}
 	shared.VerbosePrintln("Name", entry.Name)
+	if entry.Name[len(entry.Name)-1] == 0 {
+		entry.Name = entry.Name[:len(entry.Name)-1]
+	}
 
 	padding := (8 - bytesRead%8) % 8
 	shared.VerbosePrintln("\nBytes read", bytesRead)

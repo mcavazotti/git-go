@@ -7,28 +7,28 @@ import (
 )
 
 type CommitObject struct {
-	tree      string
-	parent    []string
-	author    string
-	committer string
-	gpgsig    string
-	message   string
+	Tree      string
+	Parent    []string
+	Author    string
+	Committer string
+	Gpgsig    string
+	Message   string
 }
 
 func CommitToString(commit CommitObject) string {
 	var commitStr string
 
-	commitStr += "tree " + commit.tree + "\n"
-	for _, p := range commit.parent {
+	commitStr += "tree " + commit.Tree + "\n"
+	for _, p := range commit.Parent {
 		commitStr += "parent " + p + "\n"
 	}
-	commitStr += "author " + commit.author + "\n"
-	commitStr += "committer " + commit.committer + "\n"
-	if commit.gpgsig != "" {
-		commitStr += "gpgsig " + commit.gpgsig + "\n"
+	commitStr += "author " + commit.Author + "\n"
+	commitStr += "committer " + commit.Committer + "\n"
+	if commit.Gpgsig != "" {
+		commitStr += "gpgsig " + commit.Gpgsig + "\n"
 	}
 	commitStr += "\n"
-	commitStr += commit.message
+	commitStr += commit.Message
 	return commitStr
 }
 
@@ -61,15 +61,15 @@ func ReadCommit(repository *repo.Repository, sha string) (CommitObject, error) {
 			if idx != -1 {
 				switch scanner.Text()[:idx] {
 				case "tree":
-					commit.tree = scanner.Text()[idx+1:]
+					commit.Tree = scanner.Text()[idx+1:]
 				case "parent":
-					commit.parent = append(commit.parent, scanner.Text()[idx+1:])
+					commit.Parent = append(commit.Parent, scanner.Text()[idx+1:])
 				case "author":
-					commit.author = scanner.Text()[idx+1:]
+					commit.Author = scanner.Text()[idx+1:]
 				case "committer":
-					commit.committer = scanner.Text()[idx+1:]
+					commit.Committer = scanner.Text()[idx+1:]
 				case "gpgsig":
-					commit.gpgsig += scanner.Text()[idx+1:] + "\n"
+					commit.Gpgsig += scanner.Text()[idx+1:] + "\n"
 					readingSignature = true
 				}
 			} else {
@@ -77,11 +77,11 @@ func ReadCommit(repository *repo.Repository, sha string) (CommitObject, error) {
 			}
 		} else {
 			if readingSignature {
-				commit.gpgsig += scanner.Text() + "\n"
+				commit.Gpgsig += scanner.Text() + "\n"
 				readingSignature = scanner.Text() != " -----END PGP SIGNATURE-----"
 				readingMessage = scanner.Text() == " -----END PGP SIGNATURE-----"
 			} else {
-				commit.message += scanner.Text() + "\n"
+				commit.Message += scanner.Text() + "\n"
 			}
 		}
 
