@@ -3,9 +3,10 @@ package objects
 import (
 	"bufio"
 	"mcavazotti/git-go/internal/repo"
+	"mcavazotti/git-go/internal/shared"
 	"os"
-	"os/user"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -20,9 +21,11 @@ type GitIgnore struct {
 }
 
 func ReadGitIgnore(repository *repo.Repository) (GitIgnore, error) {
+	shared.VerbosePrintln("ReadGitIgnore")
 	var ignore GitIgnore
 
 	excludeFile := repository.RepoPath(path.Join("info", "exclude"))
+	shared.VerbosePrintln("Parsing>", excludeFile)
 
 	if _, err := os.Stat(excludeFile); err == nil {
 		rules, err := parseIgnoreFile(excludeFile)
@@ -34,18 +37,25 @@ func ReadGitIgnore(repository *repo.Repository) (GitIgnore, error) {
 	}
 
 	var configHome string
+	shared.VerbosePrintln("Finding config home...")
+	shared.VerbosePrintln("Looking for ENV variable...")
 	if val, exists := os.LookupEnv("XDG_CONFIG_HOME"); exists && val != "" {
+		shared.VerbosePrintln("Found ENV variable")
 		configHome = val
 	} else {
-		usr, err := user.Current()
+		shared.VerbosePrintln("ENV variable not found")
+		shared.VerbosePrintln("Looking for user home")
+		home, err := os.UserHomeDir()
 		if err != nil {
 			return ignore, err
 		}
-		configHome = path.Join(usr.HomeDir, ".config")
+		configHome = path.Join(home, ".config")
 	}
+	shared.VerbosePrintln("Found config home")
 
 	globalIgnore := path.Join(configHome, "git", "ignore")
 
+	shared.VerbosePrintln("Exists?>", globalIgnore)
 	if _, err := os.Stat(globalIgnore); err == nil {
 		rules, err := parseIgnoreFile(globalIgnore)
 		if err != nil {
@@ -55,12 +65,15 @@ func ReadGitIgnore(repository *repo.Repository) (GitIgnore, error) {
 		ignore.absolute = append(ignore.absolute, rules...)
 	}
 
+	shared.VerbosePrintln("Reading index...")
 	index, err := ReadIndex(repository)
+	shared.VerbosePrintln("Read index")
 
 	if err != nil {
 		return ignore, err
 	}
 
+	shared.VerbosePrintln("Looking for repo's ignore files")
 	for _, entry := range index.Entries {
 		if strings.HasSuffix(entry.Name, ".gitignore") {
 			rules, err := parseIgnoreFile(path.Join(repository.WorkTree, entry.Name))
@@ -74,6 +87,7 @@ func ReadGitIgnore(repository *repo.Repository) (GitIgnore, error) {
 }
 
 func parseIgnoreFile(p string) ([]GitIgnoreRule, error) {
+	shared.VerbosePrintln("parseIgnoreFile>", p)
 	file, err := os.Open(p)
 	if err != nil {
 		return []GitIgnoreRule{}, err
@@ -83,17 +97,20 @@ func parseIgnoreFile(p string) ([]GitIgnoreRule, error) {
 
 	var rules []GitIgnoreRule
 	for scanner.Scan() {
-		line := strings.Trim(scanner.Text(), " \n")
-		if line == "" || line[1] == '#' {
+		line := strings.Trim(scanner.Text(), "\n")
+		shared.VerbosePrintln("line", line)
+		if line == "" || line[0] == '#' {
+			shared.VerbosePrintln("ignore line")
 			continue
 		} else if line[1] == '!' {
-			rules = append(rules, GitIgnoreRule{rule: path.Join(p[:len(p)-10], line[1:]), exclude: false})
+			rules = append(rules, GitIgnoreRule{rule: filepath.FromSlash(path.Join(p[:len(p)-10], line[1:])), exclude: false})
 		} else if line[1] == '\\' {
-			rules = append(rules, GitIgnoreRule{rule: path.Join(p[:len(p)-10], line[1:]), exclude: true})
+			rules = append(rules, GitIgnoreRule{rule: filepath.FromSlash(path.Join(p[:len(p)-10], line[1:])), exclude: true})
 		} else {
-			rules = append(rules, GitIgnoreRule{rule: path.Join(p[:len(p)-10], line), exclude: true})
+			rules = append(rules, GitIgnoreRule{rule: filepath.FromSlash(path.Join(p[:len(p)-10], line)), exclude: true})
 		}
 	}
+	shared.VerbosePrintln("Num rules", len(rules))
 	return rules, nil
 }
 
